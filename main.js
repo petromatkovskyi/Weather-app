@@ -1,8 +1,16 @@
 import { ICON_MAP } from './iconMap';
-import './style.css';
 import { getWeather } from './weather';
+import { MeasurementSystem } from './MeasurementSystem';
+import MEASUREMENT_UNITS from './MEASUREMENT_UNITS';
+import './style.css';
+
+const measurementSystem = new MeasurementSystem();
 
 navigator.geolocation.getCurrentPosition(positionSuccess, positionError);
+document.querySelector('#measurement-system').addEventListener('change', (e) => {
+  measurementSystem.units = e.target.value;
+  navigator.geolocation.getCurrentPosition(positionSuccess, positionError);
+});
 
 function positionSuccess({ coords }) {
   getWeather(
@@ -32,6 +40,10 @@ function renderWeather({ current, daily, hourly }) {
 
 function setValue(selector, value, { parent = document } = {}) {
   parent.querySelector(`[data-${selector}]`).textContent = value;
+  if (selector !== 'temp' && MEASUREMENT_UNITS[measurementSystem.units][selector]) {
+    parent.querySelector(`[data-${selector}-unit]`).textContent =
+      MEASUREMENT_UNITS[measurementSystem.units][selector];
+  }
 }
 
 function getIconUrl(iconCode) {
